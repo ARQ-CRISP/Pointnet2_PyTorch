@@ -7,8 +7,8 @@ from pointnet2_ops.pointnet2_modules import PointnetFPModule, PointnetSAModule
 from torch.utils.data import DataLoader, DistributedSampler
 from torchvision import transforms
 
-import pointnet2.data.data_utils as d_utils
-from pointnet2.data.ModelNet40Loader import ModelNet40Cls
+import data.data_utils as d_utils
+from data.ModelNet40Loader import ModelNet40Cls
 
 
 def set_bn_momentum_default(bn_momentum):
@@ -159,7 +159,7 @@ class PointNet2ClassificationSSG(pl.LightningModule):
         return reduced_outputs
 
     def configure_optimizers(self):
-        lr_lbmd = lambda _: max(
+        def lr_lbmd(_): return max(
             self.hparams["optimizer.lr_decay"]
             ** (
                 int(
@@ -170,7 +170,8 @@ class PointNet2ClassificationSSG(pl.LightningModule):
             ),
             lr_clip / self.hparams["optimizer.lr"],
         )
-        bn_lbmd = lambda _: max(
+
+        def bn_lbmd(_): return max(
             self.hparams["optimizer.bn_momentum"]
             * self.hparams["optimizer.bnm_decay"]
             ** (
